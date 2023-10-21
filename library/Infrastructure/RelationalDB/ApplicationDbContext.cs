@@ -5,7 +5,7 @@ namespace Infrastructure.RelationalDB;
 
 public partial class ApplicationDbContext : DbContext
 {
-    public DbSet<Book> Books { get; set; }
+    public DbSet<Author> Books { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     { }

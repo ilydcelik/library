@@ -7,5 +7,9 @@ public static class Seeder
     public static void Seed(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Book>().HasData(DefaultData.Books);
+        modelBuilder.Entity<Author>().HasData(DefaultData.Authors);
+        modelBuilder.Entity<BookType>().HasData(DefaultData.BookTypes);
+        modelBuilder.Entity<RelBookAuthor>().HasData(DefaultData.RelBookAuthors);
+        modelBuilder.Entity<RelBookType>().HasData(DefaultData.RelBookTypes);
     }
 }
