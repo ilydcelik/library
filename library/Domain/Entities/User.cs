@@ -2,13 +2,11 @@ using Domain.Base;
 
 namespace Domain.Entities;
 
-public class RelUserAuthor : BaseEntity
+public class User : BaseEntity
 {
     public string Name { get; set; }
-    public bool IsUsed { get; set; }
+    public string Adres { get; set; }
 
-    // public List<RelRelUserAuthorAuthor> RelRelUserAuthorAuthors { get; set; }
+    public List<RelUserBook> RelUserBooks { get; set; }
 
 }
-
-// kitap ekle methodu yazalım burada bağlı olduğu iki tane tablo var yazar ve tür tablosu
