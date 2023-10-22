@@ -9,4 +9,6 @@ public class RelUserBook : CoreEntity
 
     public Guid Userd { get; set; }
     public User User { get; set; }
+    public DateTime BorrowDate { get; set; }
+    public DateTime? ReturnDate { get; set; }
 }
