@@ -21,6 +21,14 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         dbContextOptionsBuilder.UseSqlServer(connectionString);
 
+        var dbContextOptions = dbContextOptionsBuilder.Options;
+
+
         return new ApplicationDbContext(dbContextOptionsBuilder.Options);
+    }
+
+    internal IDisposable CreateDbContext(object args)
+    {
+        throw new NotImplementedException();
     }
 }

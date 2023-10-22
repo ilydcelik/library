@@ -5,11 +5,15 @@ namespace Infrastructure.RelationalDB;
 
 public partial class ApplicationDbContext : DbContext
 {
-    public DbSet<Author> Books { get; set; }
+    public DbSet<Book> Books { get; set; }
+    public DbSet<Author> Authors { get; set; }
+    public DbSet<BookType> BookTypes { get; set; }
+    public DbSet<RelBookAuthor> RelBookAuthors { get; set; }
+    public DbSet<RelBookType> RelBookTypes { get; set; }
+
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     { }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

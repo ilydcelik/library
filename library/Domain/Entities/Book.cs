@@ -9,6 +9,6 @@ public class Book : BaseEntity
 
     public List<RelBookAuthor> RelBookAuthors { get; set; }
     public List<RelBookType> RelBookType { get; set; }
-
+    public List<RelUserBook> RelUserBooks { get; set; }
 
 }
