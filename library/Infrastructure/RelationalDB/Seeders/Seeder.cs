@@ -9,7 +9,9 @@ public static class Seeder
         modelBuilder.Entity<Book>().HasData(DefaultData.Books);
         modelBuilder.Entity<Author>().HasData(DefaultData.Authors);
         modelBuilder.Entity<BookType>().HasData(DefaultData.BookTypes);
+        modelBuilder.Entity<User>().HasData(DefaultData.Users);
         modelBuilder.Entity<RelBookAuthor>().HasData(DefaultData.RelBookAuthors);
         modelBuilder.Entity<RelBookType>().HasData(DefaultData.RelBookTypes);
+        modelBuilder.Entity<RelUserBook>().HasData(DefaultData.RelUserBooks);
     }
 }
