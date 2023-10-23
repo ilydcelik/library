@@ -29,6 +29,7 @@ public class AppService
             System.Console.WriteLine("6) Yazar ekle");
             System.Console.WriteLine("7) Kitap türü ekle");
             System.Console.WriteLine("8) Yeni kullanıcı ekle");
+            System.Console.WriteLine("9) Tum Kullanıcıları listele");
             System.Console.Write("Yapmak istediginiz islemin numarasini giriniz: ");
             var selection = Convert.ToInt32(System.Console.ReadLine());
             switch (selection)
@@ -54,26 +55,46 @@ public class AppService
                         Console.WriteLine("Geçersiz kitap id.");
                     }
                     break;
-                // case 4:
-                //     Console.Write("Kitap almak istediğiniz kitap id: ");
+                case 4:
+                    Console.Write("Kullanıcı ID: ");
+                    if (Guid.TryParse(Console.ReadLine(), out Guid selectedUser))
+                    {
+                        Console.Write("Kitap ID: ");
+                        if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
+                        {
+                            await BorrowBook(selectedUser, idBook);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Geçersiz kitap ID.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Geçersiz kullanıcı ID.");
+                    }
+
+                    break;
+                case 5:
+                // Console.Write("Kullanıcı ID: ");
+                // if (Guid.TryParse(Console.ReadLine(), out Guid userSelected))
+                // {
+                //     Console.Write("Kitap ID: ");
                 //     if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
                 //     {
-                //         Console.Write("Kitap almak istediğiniz kullanıcı id: ");
-                //         if (Guid.TryParse(Console.ReadLine(), out Guid userId))
-                //         {
-                //             await BorrowBook(userId, idBook);
-                //         }
-                //         else
-                //         {
-                //             Console.WriteLine("Geçersiz kullanıcı id.");
-                //         }
+                //         await ReturnBook(userSelected, idBook);
                 //     }
                 //     else
                 //     {
-                //         Console.WriteLine("Geçersiz kitap id.");
+                //         Console.WriteLine("Geçersiz kitap ID.");
                 //     }
-                //     break;
+                // }
+                // else
+                // {
+                //     Console.WriteLine("Geçersiz kullanıcı ID.");
+                // }
 
+                // break;
                 case 6:
                     {
                         string[] args = new string[] { };
@@ -90,6 +111,11 @@ public class AppService
                     {
                         string[] args = new string[] { };
                         await AddUser(args);
+                        break;
+                    }
+                case 9:
+                    {
+                        await GetAllUsers();
                         break;
                     }
 
@@ -134,9 +160,22 @@ public class AppService
                 }
                 System.Console.WriteLine();
             }
+            System.Console.WriteLine("Kullanım durumu: " + book.IsUsed);
+
 
             System.Console.WriteLine();
         }
+    }
+
+    public async Task GetAllUsers()
+    {
+        var users = _dbContext.Users.ToList();
+
+        for (int i = 0; i < users.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {users[i].Id} {users[i].Username}");
+        }
+
     }
 
     public async Task AddBook()
@@ -215,6 +254,71 @@ public class AppService
     }
     //Not: Yazar ve tür birden fazla eklenecek şekilde güncelle.
 
+    public async Task BorrowBook(Guid selectedUser, Guid bookId)
+    {
+        var user = await _dbContext.Users.FindAsync(selectedUser);
+        var book = await _dbContext.Books.FindAsync(bookId);
+
+        if (user == null || book == null)
+        {
+            Console.WriteLine("Geçersiz kullanıcı veya kitap.");
+            return;
+        }
+
+        if (book.IsUsed)
+        {
+            Console.WriteLine("Kitap zaten ödünç alınmış.");
+            return;
+        }
+
+        var relUserBook = new RelUserBook
+        {
+            UserId = selectedUser,
+            User = user,
+            BookId = bookId,
+            Book = book,
+            BorrowDate = DateTime.Now
+        };
+
+        book.IsUsed = true;
+
+        _dbContext.RelUserBooks.Add(relUserBook);
+        await _dbContext.SaveChangesAsync();
+
+        Console.WriteLine("Kitap ödünç alındı.");
+    }
+
+    // public async Task ReturnBook(Guid userId, Guid bookId)
+    // {
+    //     var user = await _dbContext.Users.FindAsync(userId);
+    //     var book = await _dbContext.Books.FindAsync(bookId);
+
+    //     if (user == null || book == null)
+    //     {
+    //         Console.WriteLine("Geçersiz kullanıcı veya kitap.");
+    //         return;
+    //     }
+
+    //     var relUserBook = await _dbContext.RelUserBooks
+    //         .Where(r => r.UserId == userId && r.BookId == bookId && r.ReturnDate == null)
+    //         .FirstOrDefault();
+
+    //     if (relUserBook != null)
+    //     {
+    //         relUserBook.ReturnDate = DateTime.Now;
+    //         book.IsUsed = false;
+    //         // relUserBook.BookId = null; 
+    //         // relUserBook.UserId = null; 
+
+    //         await _dbContext.SaveChangesAsync();
+    //         Console.WriteLine("Kitap iade edildi.");
+    //     }
+    //     else
+    //     {
+    //         Console.WriteLine("Kullanıcı bu kitabı ödünç almamış.");
+    //     }
+    // }
+
     public async Task AddUser(string[] args)
     {
         Console.WriteLine("Ad: ");
@@ -288,64 +392,7 @@ public class AppService
     }
 }
 
-// public async Task BorrowBook()
-// {
-//     Console.WriteLine("Kullanıcıları listeleyin:");
-//     var users = _dbContext.Users.ToList();
 
-//     for (int i = 0; i < users.Count; i++)
-//     {
-//         Console.WriteLine($"{i + 1}. {users[i].Username}");
-//     }
-
-//     Console.Write("Bir kullanıcı seçin veya yeni bir kullanıcı eklemek için 'Y' tuşuna basın: ");
-//     string userChoice = Console.ReadLine();
-//     User selectedUser = null;
-
-//     if (userChoice.Equals("Y", StringComparison.OrdinalIgnoreCase))
-//     {
-//         Console.Write("Ad: ");
-//         string newFirstName = Console.ReadLine();
-//         Console.Write("Soyad: ");
-//         string newLastName = Console.ReadLine();
-//         Console.Write("Kullanıcı Adı: ");
-//         string newUserName = Console.ReadLine();
-
-//         var newUser = new User
-//         {
-//             Id = Guid.NewGuid(),
-//             Username = newUserName,
-//             FirstName = newFirstName,
-//             LastName = newLastName,
-//         };
-
-//         _dbContext.Users.Add(newUser);
-//         Console.WriteLine("Yeni kullanıcı eklendi.");
-
-//     }
-//     else if (int.TryParse(userChoice, out int userIndex) && userIndex > 0 && userIndex <= users.Count)
-//     {
-//         selectedUser = users[userIndex - 1];
-//     }
-
-//     if (selectedUser != null)
-//     {
-//         // Daha sonra bu seçilen kullanıcıyı kullanarak ödünç alım işlemini gerçekleştirin
-//         Console.Write("Ödünç almak istediğiniz kitabın ID'sini girin: ");
-//         if (Guid.TryParse(Console.ReadLine(), out Guid bookId))
-//         {
-//             await BorrowBook(selectedUser.Id, bookId);
-//         }
-//         else
-//         {
-//             Console.WriteLine("Geçersiz kitap ID.");
-//         }
-//     }
-//     else
-//     {
-//         Console.WriteLine("Geçersiz kullanıcı seçimi.");
-//     }
-// }
 
 
 // public async Task ReturnBook(Guid userId, Guid bookId)
