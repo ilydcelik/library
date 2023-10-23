@@ -391,25 +391,3 @@ public class AppService
         }
     }
 }
-
-
-
-
-// public async Task ReturnBook(Guid userId, Guid bookId)
-// {
-//     // Kullanıcıyı, kitabı ve ödünç alma kaydını al
-//     var user = await _dbContext.Users.FindAsync(userId);
-//     var book = await _dbContext.Books.FindAsync(bookId);
-//     var relUserBook = await _dbContext.RelUserBooks
-//         .Where(rub => rub.UserId == userId && rub.BookId == bookId && rub.ReturnDate == null)
-//         .FirstOrDefault();
-
-//     if (user != null && book != null && relUserBook != null)
-//     {
-//         // Kitap iade edildi, iade tarihi güncellenir.
-//         relUserBook.ReturnDate = DateTime.Now;
-//         await _dbContext.SaveChangesAsync();
-//     }
-// }
-
-
