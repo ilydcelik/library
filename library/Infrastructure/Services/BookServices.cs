@@ -19,6 +19,7 @@ public class AppService
     {
         while (true)
         {
+            System.Console.WriteLine("------------------------------------------------------------------------");
             System.Console.WriteLine("\n\nYapilabilecek islemler:");
             System.Console.WriteLine("0) Uygulamadan cikmak icin");
             System.Console.WriteLine("1) Tum Kitaplari listele");
@@ -76,41 +77,38 @@ public class AppService
 
                     break;
                 case 5:
-                // Console.Write("Kullanıcı ID: ");
-                // if (Guid.TryParse(Console.ReadLine(), out Guid userSelected))
-                // {
-                //     Console.Write("Kitap ID: ");
-                //     if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
-                //     {
-                //         await ReturnBook(userSelected, idBook);
-                //     }
-                //     else
-                //     {
-                //         Console.WriteLine("Geçersiz kitap ID.");
-                //     }
-                // }
-                // else
-                // {
-                //     Console.WriteLine("Geçersiz kullanıcı ID.");
-                // }
+                    Console.Write("Kullanıcı ID: ");
+                    if (Guid.TryParse(Console.ReadLine(), out Guid userSelected))
+                    {
+                        Console.Write("Kitap ID: ");
+                        if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
+                        {
+                            await ReturnBook(userSelected, idBook);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Geçersiz kitap ID.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Geçersiz kullanıcı ID.");
+                    }
 
-                // break;
+                    break;
                 case 6:
                     {
-                        string[] args = new string[] { };
-                        await AddAuthor(args);
+                        await AddAuthor();
                         break;
                     }
                 case 7:
                     {
-                        string[] args = new string[] { };
-                        await AddBookType(args);
+                        await AddBookType();
                         break;
                     }
                 case 8:
                     {
-                        string[] args = new string[] { };
-                        await AddUser(args);
+                        await AddUser();
                         break;
                     }
                 case 9:
@@ -288,38 +286,38 @@ public class AppService
         Console.WriteLine("Kitap ödünç alındı.");
     }
 
-    // public async Task ReturnBook(Guid userId, Guid bookId)
-    // {
-    //     var user = await _dbContext.Users.FindAsync(userId);
-    //     var book = await _dbContext.Books.FindAsync(bookId);
+    public async Task ReturnBook(Guid userId, Guid bookId)
+    {
+        var user = await _dbContext.Users.FindAsync(userId);
+        var book = await _dbContext.Books.FindAsync(bookId);
 
-    //     if (user == null || book == null)
-    //     {
-    //         Console.WriteLine("Geçersiz kullanıcı veya kitap.");
-    //         return;
-    //     }
+        if (user == null || book == null)
+        {
+            Console.WriteLine("Geçersiz kullanıcı veya kitap.");
+            return;
+        }
 
-    //     var relUserBook = await _dbContext.RelUserBooks
-    //         .Where(r => r.UserId == userId && r.BookId == bookId && r.ReturnDate == null)
-    //         .FirstOrDefault();
+        var relUserBook = await _dbContext.RelUserBooks
+            .Where(r => r.UserId == userId && r.BookId == bookId && r.ReturnDate == null)
+            .FirstOrDefaultAsync();
 
-    //     if (relUserBook != null)
-    //     {
-    //         relUserBook.ReturnDate = DateTime.Now;
-    //         book.IsUsed = false;
-    //         // relUserBook.BookId = null; 
-    //         // relUserBook.UserId = null; 
+        if (relUserBook != null)
+        {
+            relUserBook.ReturnDate = DateTime.Now;
+            book.IsUsed = false;
+            // relUserBook.BookId = null; 
+            // relUserBook.UserId = null; 
 
-    //         await _dbContext.SaveChangesAsync();
-    //         Console.WriteLine("Kitap iade edildi.");
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine("Kullanıcı bu kitabı ödünç almamış.");
-    //     }
-    // }
+            await _dbContext.SaveChangesAsync();
+            Console.WriteLine("Kitap iade edildi.");
+        }
+        else
+        {
+            Console.WriteLine("Kullanıcı bu kitabı ödünç almamış.");
+        }
+    }
 
-    public async Task AddUser(string[] args)
+    public async Task AddUser()
     {
         Console.WriteLine("Ad: ");
         string newFirstName = Console.ReadLine();
@@ -328,19 +326,18 @@ public class AppService
         Console.WriteLine("Kullanıcı Adı: ");
         string newUserName = Console.ReadLine();
 
-        using (var _dbContext = new ApplicationDbContextFactory().CreateDbContext(args))
+
+        var newUser = new User
         {
-            var newUser = new User
-            {
-                // Id = Guid.NewGuid(),
-                Username = newUserName,
-                FirstName = newFirstName,
-                LastName = newLastName,
-            };
-            _dbContext.Users.Add(newUser);
-            _dbContext.SaveChanges();
-            Console.WriteLine("Kullanıcı eklendi.");
-        }
+            // Id = Guid.NewGuid(),
+            Username = newUserName,
+            FirstName = newFirstName,
+            LastName = newLastName,
+        };
+        _dbContext.Users.Add(newUser);
+        _dbContext.SaveChanges();
+        Console.WriteLine("Kullanıcı eklendi.");
+
     }
 
     public async Task DeleteBook(Guid bookId)
@@ -359,35 +356,31 @@ public class AppService
         }
     }
 
-    public async Task AddAuthor(string[] args)
+    public async Task AddAuthor()
     {
         Console.WriteLine("Yazar girin: ");
         var author = Console.ReadLine();
-        using (var _dbContext = new ApplicationDbContextFactory().CreateDbContext(args))
+        var newAuthor = new Author
         {
-            var newAuthor = new Author
-            {
-                Name = author,
-            };
-            _dbContext.Authors.Add(newAuthor);
-            _dbContext.SaveChanges();
-            Console.WriteLine("Yazar eklendi.");
-        }
+            Name = author,
+        };
+        _dbContext.Authors.Add(newAuthor);
+        _dbContext.SaveChanges();
+        Console.WriteLine("Yazar eklendi.");
     }
 
-    public async Task AddBookType(string[] args)
+    public async Task AddBookType()
     {
         Console.WriteLine("Kitap türünü girin: ");
         var bookType = Console.ReadLine();
-        using (var _dbContext = new ApplicationDbContextFactory().CreateDbContext(args))
+
+        var newBookType = new BookType
         {
-            var newBookType = new BookType
-            {
-                Name = bookType,
-            };
-            _dbContext.BookTypes.Add(newBookType);
-            _dbContext.SaveChanges();
-            Console.WriteLine("Kitap eklendi.");
-        }
+            Name = bookType,
+        };
+        _dbContext.BookTypes.Add(newBookType);
+        _dbContext.SaveChanges();
+        Console.WriteLine("Kitap eklendi.");
+
     }
 }
