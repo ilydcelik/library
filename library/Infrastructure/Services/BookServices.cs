@@ -3,16 +3,33 @@ using Domain.Entities;
 using Infrastructure.RelationalDB;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.EntityFrameworkCore;
+using Application;
+
 
 namespace Infrastructure.Services;
 
 public class AppService
 {
-    public ApplicationDbContext _dbContext { get; set; }
+    private readonly BookLayer _bookLayer;
+    private readonly AuthorLayer _authorLayer;
+    private readonly UserLayer _userLayer;
+    private readonly BookTypeLayer _bookTypeLayer;
+
+    private readonly BookTypeDataAccess _bookTypeDataAccess;
+    private readonly UserDataAccess _userDataAccess;
+    private readonly AuthorDataAccess _authorDataAccess;
+    private readonly BookDataAccess _bookDataAccess;
 
     public AppService(ApplicationDbContext dbContext)
     {
-        _dbContext = dbContext;
+        _bookLayer = new BookLayer(dbContext);
+        _authorLayer = new AuthorLayer(dbContext);
+        _userLayer = new UserLayer(dbContext);
+        _bookTypeLayer = new BookTypeLayer(dbContext);
+        _bookTypeDataAccess = new BookTypeDataAccess(dbContext);
+        _userDataAccess = new UserDataAccess(dbContext);
+        _authorDataAccess = new AuthorDataAccess(dbContext);
+        _bookDataAccess = new BookDataAccess(dbContext);
     }
 
     public async Task Promt()
@@ -23,364 +40,112 @@ public class AppService
             System.Console.WriteLine("\n\nYapilabilecek islemler:");
             System.Console.WriteLine("0) Uygulamadan cikmak icin");
             System.Console.WriteLine("1) Tum Kitaplari listele");
-            System.Console.WriteLine("2) Kitap ekle");
-            System.Console.WriteLine("3) Kitap sil");
-            System.Console.WriteLine("4) Kitap al");
-            System.Console.WriteLine("5) Kitap birak");
-            System.Console.WriteLine("6) Yazar ekle");
-            System.Console.WriteLine("7) Kitap türü ekle");
-            System.Console.WriteLine("8) Yeni kullanıcı ekle");
-            System.Console.WriteLine("9) Tum Kullanıcıları listele");
+            System.Console.WriteLine("2) Tum Yazarları listele");
+            System.Console.WriteLine("3) Tum Kitap Türlerini listele");
+            System.Console.WriteLine("4) Tum Kullanıcıları listele");
+            System.Console.WriteLine("5) Kitap ekle");
+            System.Console.WriteLine("6) Kitap sil");
+            System.Console.WriteLine("7) Kitap al");
+            System.Console.WriteLine("8) Kitap birak");
+            System.Console.WriteLine("9) Yazar ekle");
+            System.Console.WriteLine("10) Kitap türü ekle");
+            System.Console.WriteLine("11) Yeni kullanıcı ekle");
+            System.Console.WriteLine("12) Kullanıcı sil");
+            System.Console.WriteLine("13) Yazar sil");
+            System.Console.WriteLine("14) Kitap türü sil");
+            System.Console.WriteLine("15) Kitaba ek yazarlar ekle");
+            System.Console.WriteLine("16) Kitaba ek türler ekle");
             System.Console.Write("Yapmak istediginiz islemin numarasini giriniz: ");
             var selection = Convert.ToInt32(System.Console.ReadLine());
             switch (selection)
             {
                 case 0:
                     return;
-
                 case 1:
-                    await GetAllBooks();
-                    break;
+                    {
+                        await _bookDataAccess.GetAllBooks();
+                        break;
+                    }
                 case 2:
-                    await AddBook();
-                    break;
-
+                    {
+                        await _authorDataAccess.GetAllAuthors();
+                        break;
+                    }
                 case 3:
-                    Console.Write("Silmek istediğiniz kitap id: ");
-                    if (Guid.TryParse(Console.ReadLine(), out Guid bookId))
                     {
-                        await DeleteBook(bookId);
+                        await _bookTypeDataAccess.GetAllBookTypes();
+                        break;
                     }
-                    else
-                    {
-                        Console.WriteLine("Geçersiz kitap id.");
-                    }
-                    break;
                 case 4:
-                    Console.Write("Kullanıcı ID: ");
-                    if (Guid.TryParse(Console.ReadLine(), out Guid selectedUser))
                     {
-                        Console.Write("Kitap ID: ");
-                        if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
-                        {
-                            await BorrowBook(selectedUser, idBook);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Geçersiz kitap ID.");
-                        }
+                        await _userDataAccess.GetAllUsers();
+                        break;
                     }
-                    else
-                    {
-                        Console.WriteLine("Geçersiz kullanıcı ID.");
-                    }
-
-                    break;
                 case 5:
-                    Console.Write("Kullanıcı ID: ");
-                    if (Guid.TryParse(Console.ReadLine(), out Guid userSelected))
                     {
-                        Console.Write("Kitap ID: ");
-                        if (Guid.TryParse(Console.ReadLine(), out Guid idBook))
-                        {
-                            await ReturnBook(userSelected, idBook);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Geçersiz kitap ID.");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Geçersiz kullanıcı ID.");
+                        await _bookDataAccess.AddBook();
+                        break;
                     }
 
-                    break;
                 case 6:
                     {
-                        await AddAuthor();
+                        await _bookLayer.DeleteBook();
                         break;
                     }
                 case 7:
                     {
-                        await AddBookType();
+                        await _bookLayer.BorrowBook();
                         break;
                     }
                 case 8:
                     {
-                        await AddUser();
+                        await _bookLayer.ReturnBook();
                         break;
                     }
                 case 9:
                     {
-                        await GetAllUsers();
+                        await _authorDataAccess.AddAuthor();
                         break;
                     }
-
+                case 10:
+                    {
+                        await _bookTypeDataAccess.AddBookType();
+                        break;
+                    }
+                case 11:
+                    {
+                        await _userDataAccess.AddUser();
+                        break;
+                    }
+                case 12:
+                    {
+                        await _userLayer.DeleteUser();
+                        break;
+                    }
+                case 13:
+                    {
+                        await _authorLayer.DeleteAuthor();
+                        break;
+                    }
+                case 14:
+                    {
+                        await _bookTypeLayer.DeleteBookType();
+                        break;
+                    }
+                case 15:
+                    {
+                        await _bookLayer.AddAdditionalAuthorsToBook();
+                        break;
+                    }
+                case 16:
+                    {
+                        await _bookLayer.AddAdditionalTypesToBook();
+                        break;
+                    }
                 default:
                     System.Console.WriteLine("Seciminiz yanlis. Kontrol ediniz.");
                     break;
             }
         }
-    }
-
-    public async Task GetAllBooks()
-    {
-        var books = await _dbContext.Books
-            .Include(b => b.RelBookAuthors)
-            .ThenInclude(rba => rba.Author)
-            .Include(b => b.RelBookType)
-            .ThenInclude(t => t.Type)
-            .Where(b => !b.IsDeleted)
-            .ToListAsync();
-
-        foreach (var book in books)
-        {
-            System.Console.WriteLine("Kitap ID: " + book.Id);
-            System.Console.WriteLine("Kitap Adı: " + book.Name);
-
-            if (book.RelBookAuthors.Any())
-            {
-                System.Console.Write("Yazarlar: ");
-                foreach (var relBookAuthor in book.RelBookAuthors)
-                {
-                    System.Console.Write(relBookAuthor.Author.Name + ", ");
-                }
-                System.Console.WriteLine();
-            }
-
-            if (book.RelBookType.Any())
-            {
-                System.Console.Write("Türler: ");
-                foreach (var relBookType in book.RelBookType)
-                {
-                    System.Console.Write(relBookType.Type.Name + ", ");
-                }
-                System.Console.WriteLine();
-            }
-            System.Console.WriteLine("Kullanım durumu: " + book.IsUsed);
-
-
-            System.Console.WriteLine();
-        }
-    }
-
-    public async Task GetAllUsers()
-    {
-        var users = _dbContext.Users.ToList();
-
-        for (int i = 0; i < users.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {users[i].Id} {users[i].Username}");
-        }
-
-    }
-
-    public async Task AddBook()
-    {
-        Console.Write("Kitap adını girin: ");
-        string bookName = Console.ReadLine();
-
-        Console.WriteLine("Yazarları listeleyin:");
-        var authors = _dbContext.Authors.ToList();
-
-        for (int i = 0; i < authors.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {authors[i].Name}");
-        }
-
-        Console.Write("Bir yazar seçin veya yeni bir yazar eklemek için 'Y' tuşuna basın: ");
-        string authorChoice = Console.ReadLine();
-        Author selectedAuthor = null;
-
-        if (authorChoice.Equals("Y", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.Write("Yeni yazarın adını girin: ");
-            string newAuthorName = Console.ReadLine();
-            selectedAuthor = new Author { Name = newAuthorName };
-            _dbContext.Authors.Add(selectedAuthor);
-        }
-        else if (int.TryParse(authorChoice, out int authorIndex) && authorIndex > 0 && authorIndex <= authors.Count)
-        {
-            selectedAuthor = authors[authorIndex - 1];
-        }
-
-        Console.WriteLine("Kitap türlerini listeleyin:");
-        var types = _dbContext.BookTypes.ToList();
-        for (int i = 0; i < types.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {types[i].Name}");
-        }
-
-        Console.Write("Bir kitap türü seçin veya yeni bir tür eklemek için 'Y' tuşuna basın: ");
-        string typeChoice = Console.ReadLine();
-        BookType selectedType = null;
-
-        if (typeChoice.Equals("Y", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.Write("Yeni kitap türünün adını girin: ");
-            string newTypeName = Console.ReadLine();
-            selectedType = new BookType { Name = newTypeName };
-            _dbContext.BookTypes.Add(selectedType);
-        }
-        else if (int.TryParse(typeChoice, out int typeIndex) && typeIndex > 0 && typeIndex <= types.Count)
-        {
-            selectedType = types[typeIndex - 1];
-        }
-
-        var newBook = new Book
-        {
-            Name = bookName,
-            IsUsed = false
-        };
-
-        if (selectedAuthor != null)
-        {
-            newBook.RelBookAuthors = new List<RelBookAuthor> { new RelBookAuthor { Author = selectedAuthor } };
-        }
-
-        if (selectedType != null)
-        {
-            newBook.RelBookType = new List<RelBookType> { new RelBookType { Type = selectedType } };
-        }
-
-
-        _dbContext.Books.Add(newBook);
-        _dbContext.SaveChanges();
-
-        Console.WriteLine("Kitap eklendi.");
-    }
-    //Not: Yazar ve tür birden fazla eklenecek şekilde güncelle.
-
-    public async Task BorrowBook(Guid selectedUser, Guid bookId)
-    {
-        var user = await _dbContext.Users.FindAsync(selectedUser);
-        var book = await _dbContext.Books.FindAsync(bookId);
-
-        if (user == null || book == null)
-        {
-            Console.WriteLine("Geçersiz kullanıcı veya kitap.");
-            return;
-        }
-
-        if (book.IsUsed)
-        {
-            Console.WriteLine("Kitap zaten ödünç alınmış.");
-            return;
-        }
-
-        var relUserBook = new RelUserBook
-        {
-            UserId = selectedUser,
-            User = user,
-            BookId = bookId,
-            Book = book,
-            BorrowDate = DateTime.Now
-        };
-
-        book.IsUsed = true;
-
-        _dbContext.RelUserBooks.Add(relUserBook);
-        await _dbContext.SaveChangesAsync();
-
-        Console.WriteLine("Kitap ödünç alındı.");
-    }
-
-    public async Task ReturnBook(Guid userId, Guid bookId)
-    {
-        var user = await _dbContext.Users.FindAsync(userId);
-        var book = await _dbContext.Books.FindAsync(bookId);
-
-        if (user == null || book == null)
-        {
-            Console.WriteLine("Geçersiz kullanıcı veya kitap.");
-            return;
-        }
-
-        var relUserBook = await _dbContext.RelUserBooks
-            .Where(r => r.UserId == userId && r.BookId == bookId && r.ReturnDate == null)
-            .FirstOrDefaultAsync();
-
-        if (relUserBook != null)
-        {
-            relUserBook.ReturnDate = DateTime.Now;
-            book.IsUsed = false;
-            // relUserBook.BookId = null; 
-            // relUserBook.UserId = null; 
-
-            await _dbContext.SaveChangesAsync();
-            Console.WriteLine("Kitap iade edildi.");
-        }
-        else
-        {
-            Console.WriteLine("Kullanıcı bu kitabı ödünç almamış.");
-        }
-    }
-
-    public async Task AddUser()
-    {
-        Console.WriteLine("Ad: ");
-        string newFirstName = Console.ReadLine();
-        Console.WriteLine("Soyad: ");
-        string newLastName = Console.ReadLine();
-        Console.WriteLine("Kullanıcı Adı: ");
-        string newUserName = Console.ReadLine();
-
-
-        var newUser = new User
-        {
-            // Id = Guid.NewGuid(),
-            Username = newUserName,
-            FirstName = newFirstName,
-            LastName = newLastName,
-        };
-        _dbContext.Users.Add(newUser);
-        _dbContext.SaveChanges();
-        Console.WriteLine("Kullanıcı eklendi.");
-
-    }
-
-    public async Task DeleteBook(Guid bookId)
-    {
-        var book = await _dbContext.Books.FindAsync(bookId);
-
-        if (book != null)
-        {
-            book.IsDeleted = true;
-            _dbContext.SaveChanges();
-            Console.WriteLine("Kitap silindi.");
-        }
-        else
-        {
-            Console.WriteLine("Kitap bulunamadı.");
-        }
-    }
-
-    public async Task AddAuthor()
-    {
-        Console.WriteLine("Yazar girin: ");
-        var author = Console.ReadLine();
-        var newAuthor = new Author
-        {
-            Name = author,
-        };
-        _dbContext.Authors.Add(newAuthor);
-        _dbContext.SaveChanges();
-        Console.WriteLine("Yazar eklendi.");
-    }
-
-    public async Task AddBookType()
-    {
-        Console.WriteLine("Kitap türünü girin: ");
-        var bookType = Console.ReadLine();
-
-        var newBookType = new BookType
-        {
-            Name = bookType,
-        };
-        _dbContext.BookTypes.Add(newBookType);
-        _dbContext.SaveChanges();
-        Console.WriteLine("Kitap eklendi.");
-
     }
 }
